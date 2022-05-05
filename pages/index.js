@@ -1,30 +1,20 @@
 import { useEffect, useState } from 'react'
-import PrivyData from 'privy-js'
+import PrivyData, { SiweSession } from '@privy-io/privy-js'
 
 export default function Home() {
-
-  // When the page first loads, check if there is a connected wallet and get user data associated with this wallet from Privy
-  useEffect(() => { checkMetaMaskAndFetchDataFromPrivy(); }, [])
-
   // Use React's useState hook to keep track of the signed in Ethereum address and input field values
   const [ethAddress, setEthAddress] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [colorInput, setColorInput] = useState("");
 
-  // Initialize the Privy client. The /api/auth endpoint is defined under pages > api > auth.js
-  const privyData = new PrivyData(process.env.PRIVY_API_KEY, {
+  // When the page first loads, check if there is a connected wallet and get user data associated with this wallet from Privy
+  useEffect(() => { checkMetaMaskAndFetchDataFromPrivy(); }, [])
 
-    // This callback hits an endpoint you define on your backend automatically to retrieve a Privy access token
-    authCallback: async () => {
-      const result = await fetch("/api/auth", {
-        method: "POST",
-        headers: {
-          userId: ethAddress
-        },
-      });
-      const { token } = await result.json();
-      return token;
-    },
+  // Initialize the Privy client.
+  const provider = typeof window !== "undefined" ? window.ethereum : null;
+  const session = new SiweSession(process.env.NEXT_PUBLIC_PRIVY_API_KEY, provider);
+  const privyData = new PrivyData({
+    session: session,
   });
 
   /* 
@@ -47,13 +37,13 @@ export default function Home() {
         setEthAddress(address);
 
         // Fetch user's name from Privy
-        const fetchData = await privyData.fetchData(address, 'first-name');
+        const fetchData = await privyData.get(address, 'first-name');
         if (fetchData.length !== 0) {
           setNameInput(fetchData[0].data)
         }
 
         // Fetch user's favorite color from Privy
-        fetchData = await privyData.fetchData(address, 'fav-color');
+        fetchData = await privyData.get(address, 'fav-color');
         if (fetchData.length !== 0) {
           setColorInput(fetchData[0].data)
           document.body.style = 'background: ' + fetchData[0].data + ';';
@@ -83,7 +73,7 @@ export default function Home() {
 
   /* Write's the user's name and favorite color to Privy and personalizes the app */
   const submitDataToPrivy = async () => {
-    const saveData = await privyData.saveData(ethAddress, [
+    const saveData = await privyData.put(ethAddress, [
       {
         field_id: "first-name",
         data: nameInput
@@ -143,6 +133,6 @@ export default function Home() {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }
