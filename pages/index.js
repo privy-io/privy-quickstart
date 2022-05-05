@@ -1,58 +1,46 @@
 import { useEffect, useState } from 'react'
-import PrivyData, { SiweSession } from '@privy-io/privy-js'
+import PrivyClient, { SiweSession } from '@privy-io/privy-js'
+import Head from 'next/head';
 
 export default function Home() {
   // Use React's useState hook to keep track of the signed in Ethereum address and input field values
-  const [ethAddress, setEthAddress] = useState("");
+  const [userId, setUserId] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [colorInput, setColorInput] = useState("");
 
   // When the page first loads, check if there is a connected wallet and get user data associated with this wallet from Privy
-  useEffect(() => { checkMetaMaskAndFetchDataFromPrivy(); }, [])
+  useEffect(() => {
+    const fetchDataFromPrivy = async () => {
+      try {
+        // If this is a refresh, we need to pull the address into state
+        const address = await session.address();
+        if (!address) return
+        setUserId(address)
+
+        // Fetch user's name and favorite color from Privy
+        const [firstName, favColor] = await client.get(address, ['first-name', 'fav-color']);
+        if (firstName) setNameInput(firstName.text())
+        if (favColor) {
+          setColorInput(favColor.text())
+          document.body.style = 'background: ' + favColor.text() + ';';
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchDataFromPrivy()
+  }, [])
 
   // Initialize the Privy client.
   const provider = typeof window !== "undefined" ? window.ethereum : null;
-  const session = new SiweSession(process.env.NEXT_PUBLIC_PRIVY_API_KEY, provider);
-  const privyData = new PrivyData({
-    session: session,
+  const session = new SiweSession(process.env.NEXT_PUBLIC_PRIVY_API_KEY, provider, {
+    baseURL: process.env.NEXT_PUBLIC_PRIVY_API_HOST
   });
-
-  /* 
-    Checks to see if there is a MetaMask wallet connected. If there is, it will  
-    fetch the associated user's name and favorite color.
-  */
-  const checkMetaMaskAndFetchDataFromPrivy = async () => {
-    try {
-      const { ethereum } = window;
-
-      if (!ethereum) {
-        alert("Please install MetaMask for this demo: https://metamask.io/");
-        return;
-      }
-
-      const connectedAddresses = await ethereum.request({ method: "eth_accounts" });
-
-      if (connectedAddresses.length !== 0) {
-        const address = connectedAddresses[0];
-        setEthAddress(address);
-
-        // Fetch user's name from Privy
-        const fetchData = await privyData.get(address, 'first-name');
-        if (fetchData.length !== 0) {
-          setNameInput(fetchData[0].data)
-        }
-
-        // Fetch user's favorite color from Privy
-        fetchData = await privyData.get(address, 'fav-color');
-        if (fetchData.length !== 0) {
-          setColorInput(fetchData[0].data)
-          document.body.style = 'background: ' + fetchData[0].data + ';';
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const client = new PrivyClient({
+    session: session,
+    apiURL: process.env.NEXT_PUBLIC_PRIVY_API_HOST,
+    kmsURL: process.env.NEXT_PUBLIC_PRIVY_KMS_HOST,
+  });
 
   /* Connects to a MetaMask wallet */
   const connectToWallet = async () => {
@@ -64,8 +52,9 @@ export default function Home() {
         return;
       }
 
-      const addresses = await ethereum.request({ method: "eth_requestAccounts" });
-      setEthAddress(addresses[0]);
+      await session.authenticate();
+      const userId = await session.address();
+      setUserId(userId);
     } catch (error) {
       console.log(error)
     }
@@ -73,14 +62,14 @@ export default function Home() {
 
   /* Write's the user's name and favorite color to Privy and personalizes the app */
   const submitDataToPrivy = async () => {
-    const saveData = await privyData.put(ethAddress, [
+    await client.put(userId, [
       {
-        field_id: "first-name",
-        data: nameInput
+        field: "first-name",
+        value: nameInput
       },
       {
-        field_id: "fav-color",
-        data: colorInput
+        field: "fav-color",
+        value: colorInput
       }
     ]);
 
@@ -90,8 +79,11 @@ export default function Home() {
   /* What is rendered on the page */
   return (
     <div>
+      <Head>
+        <title>Privy Quickstart</title>
+      </Head>
       <div style={{ textAlign: 'center', marginTop: '10%', fontSize: 20, fontFamily: 'Arial' }}>
-        {ethAddress && (
+        {userId && (
           <div>
             <h1>
               Hey {nameInput ? nameInput : "there"} 👋
@@ -122,7 +114,7 @@ export default function Home() {
           </div>
         )}
 
-        {!ethAddress && (
+        {!userId && (
           <div>
             <div>
               To get started, connect with MetaMask!
