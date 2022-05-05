@@ -1,6 +1,4 @@
 import PrivyNode from "@privy-io/node";
-require('dotenv').config()
-
 
 /* 
   The frontend client will hit this endpoint to request a Privy access token. Here, you can use 
@@ -15,14 +13,14 @@ export default async (req, res) => {
   const privyNode = new PrivyNode(process.env.PRIVY_API_KEY, process.env.PRIVY_API_SECRET);
 
   // TODO: What are the requester's identity and roles? BYO authorization logic. We've hardcorded it in the sample. 
-  const requesterId = req.headers.userid; 
+  const requesterId = req.headers.userid;
   const requesterRoles = ['admin'];
 
   // Generate a Privy access token!
   try {
     const token = await privyNode.createAccessToken(requesterId, requesterRoles);
     res.status(200).send({ token });
-  } catch(error) {
+  } catch (error) {
     res.status(500).send({ error });
   }
 }
