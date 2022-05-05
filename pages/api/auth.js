@@ -5,9 +5,8 @@ import PrivyNode from "@privy-io/node";
   your own authentication and authorization logic to determine whether access should be granted and 
   with what roles/scopes.
 */
-export default async (req, res) => {
-
-  // TODO: Is this request to your backend legit? BYO authentication logic/middleware. We've ommited it in the sample. 
+const handler = async (req, res) => {
+  // TODO: Is this request to your backend legit? BYO authentication logic/middleware. We've omitted it in the sample. 
 
   // Initialize the PrivyNode client with your API key and secret
   const privyNode = new PrivyNode(process.env.PRIVY_API_KEY, process.env.PRIVY_API_SECRET);
@@ -25,4 +24,4 @@ export default async (req, res) => {
   }
 }
 
-
+export default handler;

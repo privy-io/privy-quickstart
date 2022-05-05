@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import PrivyData from 'privy-js'
 
 export default function Home() {
-  
+
   // When the page first loads, check if there is a connected wallet and get user data associated with this wallet from Privy
   useEffect(() => { checkMetaMaskAndFetchDataFromPrivy(); }, [])
-  
+
   // Use React's useState hook to keep track of the signed in Ethereum address and input field values
   const [ethAddress, setEthAddress] = useState("");
   const [nameInput, setNameInput] = useState("");
@@ -30,7 +30,7 @@ export default function Home() {
   /* 
     Checks to see if there is a MetaMask wallet connected. If there is, it will  
     fetch the associated user's name and favorite color.
-  */ 
+  */
   const checkMetaMaskAndFetchDataFromPrivy = async () => {
     try {
       const { ethereum } = window;
@@ -47,24 +47,24 @@ export default function Home() {
         setEthAddress(address);
 
         // Fetch user's name from Privy
-        const fetchData = await privyData.fetchData(address, 'first-name');        
-        if(fetchData.length !== 0) {
+        const fetchData = await privyData.fetchData(address, 'first-name');
+        if (fetchData.length !== 0) {
           setNameInput(fetchData[0].data)
         }
 
         // Fetch user's favorite color from Privy
-        fetchData = await privyData.fetchData(address, 'fav-color');        
-        if(fetchData.length !== 0) {
+        fetchData = await privyData.fetchData(address, 'fav-color');
+        if (fetchData.length !== 0) {
           setColorInput(fetchData[0].data)
           document.body.style = 'background: ' + fetchData[0].data + ';';
         }
-      } 
+      }
     } catch (error) {
       console.log(error);
     }
   }
 
-  /* Connects to a MetaMask wallet */ 
+  /* Connects to a MetaMask wallet */
   const connectToWallet = async () => {
     try {
       const { ethereum } = window;
@@ -81,7 +81,7 @@ export default function Home() {
     }
   }
 
-  /* Write's the user's name and favorite color to Privy and personalizes the app */ 
+  /* Write's the user's name and favorite color to Privy and personalizes the app */
   const submitDataToPrivy = async () => {
     const saveData = await privyData.saveData(ethAddress, [
       {
@@ -100,34 +100,34 @@ export default function Home() {
   /* What is rendered on the page */
   return (
     <div>
-      <div style={{textAlign:'center', marginTop:'10%', fontSize:20, fontFamily:'Arial'}}>
-        {ethAddress && ( 
+      <div style={{ textAlign: 'center', marginTop: '10%', fontSize: 20, fontFamily: 'Arial' }}>
+        {ethAddress && (
           <div>
             <h1>
-               Hey {nameInput ? nameInput : "there"} 👋 
+              Hey {nameInput ? nameInput : "there"} 👋
             </h1>
-            <div style={{marginTop:'40px'}}>
-              <table style={{margin:'auto', textAlign:'right'}}>
+            <div style={{ marginTop: '40px' }}>
+              <table style={{ margin: 'auto', textAlign: 'right' }}>
                 <tbody>
                   <tr>
                     <td>
                       Your name?
                     </td>
-                    <td style={{paddingLeft:'10px'}} >
-                      <input onChange={(event) => {setNameInput(event.target.value)}} value={nameInput}/>
+                    <td style={{ paddingLeft: '10px' }} >
+                      <input onChange={(event) => { setNameInput(event.target.value) }} value={nameInput} />
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      Favorite color? 
+                      Favorite color?
                     </td>
-                    <td style={{paddingLeft:'10px'}}>
-                      <input onChange={(event) => {setColorInput(event.target.value)}} value={colorInput}/>
+                    <td style={{ paddingLeft: '10px' }}>
+                      <input onChange={(event) => { setColorInput(event.target.value) }} value={colorInput} />
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <button style={{marginTop:'20px'}} onClick={submitDataToPrivy}>Save with Privy</button>
+              <button style={{ marginTop: '20px' }} onClick={submitDataToPrivy}>Save with Privy</button>
             </div>
           </div>
         )}
