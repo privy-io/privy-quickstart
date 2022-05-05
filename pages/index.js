@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import PrivyClient, { SiweSession } from '@privy-io/privy-js'
 import Head from 'next/head';
 
+// Initialize the Privy client.
+const provider = typeof window !== "undefined" ? window.ethereum : null;
+const session = new SiweSession(process.env.NEXT_PUBLIC_PRIVY_API_KEY, provider)
+const client = new PrivyClient({
+  session: session,
+});
+
 export default function Home() {
   // Use React's useState hook to keep track of the signed in Ethereum address and input field values
   const [userId, setUserId] = useState("");
@@ -30,17 +37,6 @@ export default function Home() {
     }
     fetchDataFromPrivy()
   }, [])
-
-  // Initialize the Privy client.
-  const provider = typeof window !== "undefined" ? window.ethereum : null;
-  const session = new SiweSession(process.env.NEXT_PUBLIC_PRIVY_API_KEY, provider, {
-    baseURL: process.env.NEXT_PUBLIC_PRIVY_API_HOST
-  });
-  const client = new PrivyClient({
-    session: session,
-    apiURL: process.env.NEXT_PUBLIC_PRIVY_API_HOST,
-    kmsURL: process.env.NEXT_PUBLIC_PRIVY_KMS_HOST,
-  });
 
   /* Connects to a MetaMask wallet */
   const connectToWallet = async () => {
