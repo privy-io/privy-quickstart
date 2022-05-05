@@ -15,7 +15,8 @@ export default function Home() {
   const [nameInput, setNameInput] = useState("");
   const [colorInput, setColorInput] = useState("");
 
-  // When the page first loads, check if there is a connected wallet and get user data associated with this wallet from Privy
+  //When the page first loads, check if there is a connected wallet and get
+  // user data associated with this wallet from Privy
   useEffect(() => {
     const fetchDataFromPrivy = async () => {
       try {
@@ -29,16 +30,16 @@ export default function Home() {
         if (firstName) setNameInput(firstName.text())
         if (favColor) {
           setColorInput(favColor.text())
-          document.body.style = 'background: ' + favColor.text() + ';';
+          document.body.style = `background: ${favColor.text()};`;
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
     fetchDataFromPrivy()
   }, [])
 
-  /* Connects to a MetaMask wallet */
+  /* Connect to a MetaMask wallet */
   const connectToWallet = async () => {
     try {
       const { ethereum } = window;
@@ -52,11 +53,11 @@ export default function Home() {
       const userId = await session.address();
       setUserId(userId);
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
   }
 
-  /* Write's the user's name and favorite color to Privy and personalizes the app */
+  /* Writes the user's name and favorite color to Privy and personalizes the app */
   const submitDataToPrivy = async () => {
     await client.put(userId, [
       {
@@ -69,10 +70,10 @@ export default function Home() {
       }
     ]);
 
-    document.body.style = 'background: ' + colorInput + ';';
+    document.body.style = `background: ${colorInput};`;
   }
 
-  /* What is rendered on the page */
+  // What is rendered on the page
   return (
     <div>
       <Head>
