@@ -16,9 +16,8 @@ const DARK_TEXT_COLOR = '#171717'
 /* A fun little text styling change depending on your favorite color. */
 function pickTextColorBasedOnBgColor(bgColor) {
   try {
-    const c = Color(bgColor)
-    return (((c.red() * 0.299) + (c.green() * 0.587) + (c.blue() * 0.114)) > 186) ?
-      DARK_TEXT_COLOR : LIGHT_TEXT_COLOR;
+    const color = Color(bgColor)
+    return color.isLight() ? DARK_TEXT_COLOR : LIGHT_TEXT_COLOR;
   } catch (e) {
     return DARK_TEXT_COLOR
   }
