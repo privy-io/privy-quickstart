@@ -69,6 +69,35 @@ export default function Home() {
     updateAddress();
   }, []);
 
+  // Get user data from Privy.
+  const getUserData = async () => {
+    try {
+      if (!address) return;
+
+      // Fetch user's name and favorite color from Privy
+      const [firstName, dateOfBirth, favoriteColor] = await client.get(
+        address,
+        ["first-name", "date-of-birth", "favorite-color"]
+      );
+      setFirstName(firstName?.text());
+      setDateOfBirth(dateOfBirth?.text());
+      setFavoriteColor(favoriteColor?.text());
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Get the user data from Privy whenever the wallet address is set.
+  useEffect(() => {
+    getUserData();
+  }, [address]);
+
+  // Set background to user's favorite color.
+  useEffect(() => {
+    if (!favoriteColor) return;
+    document.body.style = `background: ${favoriteColor};`;
+  }, [favoriteColor]);
+
   return (
     <>
       <Head>
